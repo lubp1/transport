@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css">
+        <title>Login</title>
+    </head>
+
+    <body>
+        <div id="appIndex">
+            <h1>Login no Sistema</h1>
+            <form>
+                <input type="text" data-cy="email" v-model="email" placeholder="E-mail"><br><br>
+                <input type="password" data-cy="senha" v-model="senha" placeholder="Senha"><br><br>
+                <button id="botaoOpcao" data-cy="login" v-on:click.prevent="login"> Login </button>
+                <button id="botaoOpcao" data-cy="cadastro" v-on:click.prevent="cadastro"> Não sou cadastrado </button>
+            </form>  
+        </div>
+    </body>
+
+    <script>
+
+        var app = new Vue({
+            el: "#appIndex",
+            data: {
+                email: "",
+                senha: ""
+            },
+            methods: {
+                login() {   
+                    this.$http.post('/inicio', {"email" : this.email, "senha" : this.senha}).then(
+                        (response) => {if(response.status == 200) {window.open('/inicio', "_self");}
+                        else if (response.status == 201) {window.open('/passagemBalcao', "_self");}}, 
+                        (error) => {alert('Usuario e/ou senha incorreto');});
+                },
+                cadastro() {
+                    this.$http.get('/cadastro').then((response) => {window.open('/cadastro', "_self");});
+                }
+            }
+        })
+    </script>
+</html>

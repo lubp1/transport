@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css">
+        <title>Compra de Passagem</title>
+    </head>
+
+    <body>
+        <div id="appPassagem">
+            <h1>Compra de Passagem</h1>
+            <form>
+                Partida: <select v-if="!temHorario" v-model="partida" data-cy="partida">
+                    <option disabled value=""></option>
+                    <option value="Campinas">Campinas</option>
+                    <option value="São Paulo">São Paulo</option>
+                    <option value="Rio de Janeiro">Rio de Janeiro</option>
+                </select> 
+                <span v-if="temHorario">{{ partida }}</span> <br> <br>
+
+                Destino: <select v-if="!temHorario" v-model="destino" data-cy="destino">
+                    <option disabled value=""></option>
+                    <option value="Campinas">Campinas</option>
+                    <option value="São Paulo">São Paulo</option>
+                    <option value="Rio de Janeiro">Rio de Janeiro</option>
+                </select> 
+                <span v-if="temHorario">{{ destino }}</span> <br> <br>
+
+                <button type="button" id="botaoOpcao" v-if="!temHorario" data-cy="procurarHorario" v-on:click.prevent="procurarHorario()"> Procurar Horários </button>
+                
+                
+                <span v-if="temHorario">Horário: </span> <select v-if="temHorario && !temAssento" v-model="horario" data="" data-cy="horario">
+                    <option disabled value=""></option>
+                    <option v-for="item in viagem">{{ item.horario }}</option>
+                </select> 
+                <span v-if="temAssento">{{ horario }}</span> <br> <br>
+
+                
+                <button type="button" id="botaoOpcao" v-if="temHorario && !temAssento" 
+                        v-on:click.prevent="procurarAssento()" data-cy="procurarAssento"> Procurar Assentos </button>
+
+                <span v-if="temAssento">Assento: </span> <select v-if="temHorario && temAssento && !escolheAssento" 
+                                                                                    v-model="assento" data-cy="assento" data="">
+                    <option disabled value=0></option>
+                    <option v-for="item in achaAssentos"> {{ item }} </option>
+                </select> 
+                <span v-if="escolheAssento">{{ assento }}</span> <br> <br>
+                
+                
+                <button type="button" id="botaoOpcao" v-if="temHorario && temAssento && !escolheAssento" 
+                v-on:click.prevent="escolherAssento()" data-cy="escolherAssento"> Escolher Assento </button>
+                
+
+                <form v-if="escolheAssento && !achouCPF">
+                    <input v-if="escolheAssento && !achouCPF" v-model="cpf" placeholder="CPF" data-cy="cpf"><br><br>
+                    <button id="botaoOpcao" v-if="escolheAssento && !achouCPF" 
+                            v-on:click.prevent="procurarCPF()" data-cy="procurarCPF"> Procurar CPF </button>
+                </form>
+                <span v-if="achouCPF"> CPF: {{ cpf }} </span>  <br> <br>
+                <span v-if="pronto"> Nome: {{ nome }} </span> <br> <br>
+                <span v-if="pronto"> E-mail: {{ email }} </span> <br> <br>
+
+                <button id="botaoOpcao" v-if="pronto" v-on:click.prevent="comprar()" data-cy="comprar"> Comprar  </button>
+                
+
+                
+                <form v-if="cadastra">
+                    <input type="text" v-if="cadastra" v-model="nome" placeholder="Nome" data-cy="nome"><br><br>
+                    <input type="text" v-if="cadastra" v-model="email" placeholder="E-mail" data-cy="email"><br><br>
+                    <button id="botaoOpcao" v-if="cadastra" v-on:click.prevent="cadastro()" data-cy="cadastro"> Cadastrar </button>
+                </form>
+
+
+                
+            </form>  
+        </div>
+    </body>
+
+    <script>
+        var app = new Vue({
+            el: "#appPassagem",
+            data: {
+                partida: "",
+                destino: "",
+                horario: "",
+                assento: 0,
+                cpf: "",
+                viagem: [],
+                usuario: {},
+                nome: "",
+                email: "",
+                temHorario: false,
+                temAssento: false,
+                escolheAssento: false,
+                achouCPF: false,
+                cadastra: false,
+                pronto: false
+            },
+            methods: {
+                procurarHorario() {
+                    if(this.partida == "" || this.destino == "") {
+                        alert("Preencha todos os campos");
+                    }
+                    else if(!this.partida.localeCompare(this.destino)) {
+                        alert("Insira partida e destino diferentes");
+                    } else {
+                        this.$http.post('/passagemBalcao', {"partida" : this.partida, "destino" : this.destino, "horario": "", "assento": 0,
+                                                            "cpf": ""}).then(
+                        (response) => {if(response.status == 200) {this.temHorario = true; this.viagem = response.body.viagem;}},
+                        (error) => {alert('Não há horários disponíveis!');});
+                    }
+                },
+                procurarAssento() {
+                    if(this.horario == "") {
+                        alert("Escolha um horário");
+                    } else {
+                        this.$http.post('/passagemBalcao', {"partida" : this.partida, "destino" : this.destino, 
+                                                            "horario": this.horario, "cpf": ""}).then(
+                        (response) => {if(response.status == 200) {this.temAssento = true; this.viagem = response.body.viagem;}},
+                        (error) => {alert('Não há assentos disponíveis!');});
+                    }
+                },
+                escolherAssento() {
+                    if(this.assento == 0) {
+                        alert("Escolha um assento");
+                    } else {
+                        this.escolheAssento = true;
+                    }
+                },
+                procurarCPF() {
+                    if(this.cpf == "") {
+                        alert("Digite seu CPF");
+                    } else {
+                        this.$http.post('/passagemBalcao', {"cpf": this.cpf}).then(
+                        (response) => {if(response.status == 200) {
+                                            if(response.body.usuario != null) {
+                                                this.usuario = response.body.usuario; this.nome = this.usuario.nome; 
+                                                this.email = this.usuario.email; this.achouCPF = true; this.pronto = true;}
+                                            else { 
+                                                this.cadastra = true; this.achouCPF = true;}}},
+                        (error) => {this.cadastra = true; this.achouCPF = true;});
+                    }
+                },
+                cadastro() {
+                    if (this.nome == "") {
+                        alert("Preencha todos os campos");
+                    } else {
+                        this.$http.post('/cadastro/:' + this.email, {"nome" : this.nome, "email" : this.email, "senha": "", "cpf" : this.cpf}).then(
+                                (response) => {if(response.status == 200) {this.cadastra = false; 
+                                                                            this.pronto = true;}}, 
+                                (error) => {alert('E-mail já foi cadastrado');});
+                    }
+                },
+                comprar() {
+                    if(this.partida == "" || this.destino == "" || this.horario == "" || this.assento == "" || this.cpf == "") {
+                        alert("Preencha todos os campos e tente novamente");
+                        window.open('/passagemBalcao', "_self");
+                    }
+                    this.$http.post('/passagemBalcao/:' + this.cpf, {"partida" : this.partida, "destino" : this.destino, 
+                                                            "horario": this.horario, "assento": this.assento, "cpf": this.cpf}).then(
+                                (response) => {if(response.status == 200) {alert('Passagem comprada com sucesso!'); 
+                                                                            window.open('/passagemBalcao', "_self");}}, 
+                                (error) => {alert('Erro na compra!');});
+                }
+            },
+            computed: {
+                achaAssentos: function() { // Funcao para mostrar assentos disponiveis
+                    var assentos = [];
+                    var i = 0;
+                    while (i<51) {
+                        assentos[i] = i++;
+                    }
+                    i=0;
+                    while (i<51) {
+                        if(this.viagem[i] == null) {
+                            break;
+                        }
+                        var j = 0;
+                        while(j<51) {
+                            if(assentos[j] == this.viagem[i].assento) {
+                                assentos.splice(j, 1);
+                            }
+                            j++;
+                        }
+                        i++;
+                    }
+                    return assentos;
+                }  
+            }
+        })
+    </script>
+</html>

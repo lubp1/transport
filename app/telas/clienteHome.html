@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="https://unpkg.com/vue"></script>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css">
+        <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+        <script src="https://unpkg.com/vue-router"></script>
+        <title>Tela Inicial</title>
+    </head>
+
+    <body>
+        <div id="appHome">
+            <h1>Seja bem-vindo</h1> <br> <br>
+            <button id="botaoInicial" v-on:click="novaPassagem()"> Nova Passagem </button>
+            <button id="botaoInicial" v-on:click="novaEncomenda()"> Nova Encomenda </button> <br> <br>
+            <button id="botaoInicial" v-on:click="consultarPassagem()"> Consultar Passagem </button>
+            <button id="botaoInicial" v-on:click="consultarEncomenda()"> Consultar Encomenda </button>
+        </div>
+    </body>
+
+    <script>
+        var router = new VueRouter({
+            mode: 'history',
+            routes: []
+        });
+        var app = new Vue({
+            el: "#appHome",
+            data: {
+                nome: ""
+            },
+            methods: {
+                novaPassagem() {
+                    alert("Comprando nova passagem");
+                },
+                novaEncomenda() {
+                    alert("Comprando nova encomenda");
+                },
+                consultarPassagem() {
+                    alert("Consultando passagens");
+                },
+                consultarEncomenda() {
+                    alert("Consultando encomendas");
+                }
+            },    
+            mounted: function() {
+                name = this.$route.query.name
+            }
+        })
+    </script>
+</html>

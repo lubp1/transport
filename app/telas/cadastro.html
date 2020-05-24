@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/mystyle.css">
+        <title>Cadastro de Usuário</title>
+    </head>
+
+    <body>
+        <div id="appCadastro">
+            <h1>Cadastro no Sistema</h1>
+            <form>
+                <input type="text" data-cy="nome" v-model="nome" placeholder="Nome"><br><br>
+                <input type="text" data-cy="email" v-model="email" data-cy="email" placeholder="E-mail"><br><br>
+                <input type="text" data-cy="cpf" v-model="cpf" data-cy="cpf" placeholder="CPF"><br><br>
+                <input type="password" data-cy="senha" v-model="senha" data-cy="senha" placeholder="Senha"><br><br>
+                <input type="password" data-cy="confirmasenha" v-model="confirmasenha" data-cy="confirmasenha" placeholder="Confirmar Senha"><br><br>
+                <button id="botaoOpcao" data-cy="cadastro" v-on:click.prevent="cadastro()"> Cadastrar </button>
+            </form>  
+        </div>
+    </body>
+
+    <script>
+        var app = new Vue({
+            el: "#appCadastro",
+            data: {
+                nome: "",
+                email: "",
+                cpf: "",
+                senha: "",
+                confirmasenha: ""
+            },
+            methods: {
+                cadastro() {
+                    if (this.nome == "" || this.email == "" || this.cpf == "" || this.senha == "" || this. confirmasenha == "") {
+                        alert("Preencha todos os campos");
+                    }
+                    else if (this.senha.localeCompare(this.confirmasenha)) {
+                        alert("Senhas divergentes!");
+                    } else {
+                        this.$http.post('/cadastro/:' + this.email, {"nome" : this.nome, "email" : this.email, "cpf" : this.cpf, 
+                            "senha" : this.senha}).then(
+                                (response) => {if(response.status == 200) {alert('Cadastrado com sucesso!'); window.open('/', "_self");}
+                                               else if(response.status == 201) {alert('Cadastro atualizado!'); window.open('/', "_self");}}, 
+                                (error) => {alert('Erro no cadastro!');});
+                    }
+                }
+            }
+        })
+    </script>
+</html>
